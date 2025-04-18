@@ -36,6 +36,19 @@ type PharmacyMasksDTO struct {
 	Stock int
 }
 
+type FilterMaskCountQuery struct {
+	MinPrice   float64
+	MaxPrice   float64
+	Comparison string // "more" or "less"
+	Count      int
+}
+
+type PharmacyMaskCountDTO struct {
+	ID        string
+	Name      string
+	MaskCount int
+}
+
 func (p *PharmacyQueryService) GetOpenPharmaciesOfTime(q OpenPharmacieQuery) ([]OpenPharmacieDTO, error) {
 	var result []OpenPharmacieDTO
 
@@ -70,5 +83,32 @@ func (p *PharmacyQueryService) GetMasksByPharmacy(query PharmacyMasksQuery) ([]P
 	if err := p.db.Raw(sql, query.PharmacyID).Scan(&result).Error; err != nil {
 		return nil, err
 	}
+	return result, nil
+}
+
+func (p *PharmacyQueryService) GetPharmaciesByMaskCount(query FilterMaskCountQuery) ([]PharmacyMaskCountDTO, error) {
+	var result []PharmacyMaskCountDTO
+
+	//TODO: check query is valid
+	comparisonOp := ">"
+	if query.Comparison == "less" {
+		comparisonOp = "<"
+	}
+	sql := `
+		SELECT 
+			pharmacies.id AS id,
+			pharmacies.name AS name,
+			SUM(masks.stock) AS mask_count
+		FROM pharmacies
+		JOIN masks ON masks.pharmacy_id = pharmacies.id
+		WHERE masks.price BETWEEN $1 AND $2
+		GROUP BY pharmacies.id, pharmacies.name
+		HAVING SUM(masks.stock) ` + comparisonOp + ` $3
+	`
+
+	if err := p.db.Raw(sql, query.MinPrice, query.MaxPrice, query.Count).Scan(&result).Error; err != nil {
+		return nil, err
+	}
+
 	return result, nil
 }

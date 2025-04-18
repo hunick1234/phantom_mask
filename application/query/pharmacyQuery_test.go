@@ -5,6 +5,7 @@ import (
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"slices"
 )
 
 func setupTestDB(t *testing.T) *gorm.DB {
@@ -127,7 +128,7 @@ func TestGetMasksByPharmacy(t *testing.T) {
 		{1, "name", 4},
 		{2, "price", 1},
 		{3, "price", 1},
-		{100, "price",0},
+		{100, "price", 0},
 	}
 
 	for _, v := range tests {
@@ -161,4 +162,68 @@ func TestGetMasksByPharmacy(t *testing.T) {
 
 	}
 
+}
+
+func TestGetPharmaciesByMaskCount(t *testing.T) {
+	db := setupTestDB(t)
+	service := &PharmacyQueryService{db: db}
+
+	tests := []struct {
+		name       string
+		query      FilterMaskCountQuery
+		expectIDs  []string
+		expectSize int
+	}{
+		{
+			name: "more than 2 masks",
+			query: FilterMaskCountQuery{
+				MinPrice:   2.0,
+				MaxPrice:   11.0,
+				Comparison: "more",
+				Count:      2,
+			},
+			expectIDs:  []string{"1"},
+			expectSize: 1,
+		},
+		{
+			name: "less than 2 masks",
+			query: FilterMaskCountQuery{
+				MinPrice:   2.0,
+				MaxPrice:   10.0,
+				Comparison: "less",
+				Count:      2,
+			},
+			expectIDs:  []string{},
+			expectSize: 0,
+		},
+		{
+			name: "more than 0 masks",
+			query: FilterMaskCountQuery{
+				MinPrice:   1.0,
+				MaxPrice:   30.0,
+				Comparison: "more",
+				Count:      0,
+			},
+			expectIDs:  []string{"1","2","3","4"},
+			expectSize: 4,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := service.GetPharmaciesByMaskCount(tt.query)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if len(result) != tt.expectSize {
+				t.Errorf("expected %d pharmacies, got %d", tt.expectSize, len(result))
+			}
+			for _, pharmacy := range result {
+				found := slices.Contains(tt.expectIDs, pharmacy.ID)
+				if !found {
+					t.Errorf("expected pharmacy ID %s not found", pharmacy.ID)
+				}
+			}
+		})
+	}
 }
