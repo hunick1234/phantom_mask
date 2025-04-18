@@ -3,9 +3,10 @@ package query
 import (
 	"testing"
 
+	"slices"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"slices"
 )
 
 func setupTestDB(t *testing.T) *gorm.DB {
@@ -204,7 +205,7 @@ func TestGetPharmaciesByMaskCount(t *testing.T) {
 				Comparison: "more",
 				Count:      0,
 			},
-			expectIDs:  []string{"1","2","3","4"},
+			expectIDs:  []string{"1", "2", "3", "4"},
 			expectSize: 4,
 		},
 	}
@@ -225,5 +226,34 @@ func TestGetPharmaciesByMaskCount(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestSearchPhamaciesByKeyword(t *testing.T) {
+	db := setupTestDB(t)
+	service := &PharmacyQueryService{db: db}
+
+	tests := []struct {
+		keyword      string
+		findExpected int
+	}{
+		{"Mask A", 0},
+		{"ar", 6},
+	}
+
+	for _, tt := range tests {
+		query := PharmacySearchQuery{Keyword: tt.keyword}
+		result, err := service.SearchPharmaciesByKeyword(query)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		var names []string
+		for _, mask := range result {
+			names = append(names, mask.Name)
+		}
+		if len(names) != tt.findExpected {
+			t.Errorf("expected %d masks, got %d", tt.findExpected, len(names))
+		}
 	}
 }

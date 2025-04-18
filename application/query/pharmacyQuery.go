@@ -49,6 +49,16 @@ type PharmacyMaskCountDTO struct {
 	MaskCount int
 }
 
+type PharmacySearchQuery struct {
+	Keyword string
+}
+
+type PharmacySearchDTO struct {
+	ID   string
+	Type string
+	Name string
+}
+
 func (p *PharmacyQueryService) GetOpenPharmaciesOfTime(q OpenPharmacieQuery) ([]OpenPharmacieDTO, error) {
 	var result []OpenPharmacieDTO
 
@@ -107,6 +117,25 @@ func (p *PharmacyQueryService) GetPharmaciesByMaskCount(query FilterMaskCountQue
 	`
 
 	if err := p.db.Raw(sql, query.MinPrice, query.MaxPrice, query.Count).Scan(&result).Error; err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func (p *PharmacyQueryService) SearchPharmaciesByKeyword(query PharmacySearchQuery) ([]PharmacySearchDTO, error) {
+	var result []PharmacySearchDTO
+
+	sql := `
+	SELECT 
+		pharmacies.id,
+		pharmacies.name,
+		'pharmacy' AS type
+	FROM pharmacies
+	WHERE name ILIKE '%' || $1 || '%'
+	`
+
+	if err := p.db.Raw(sql, query.Keyword).Scan(&result).Error; err != nil {
 		return nil, err
 	}
 
