@@ -1,6 +1,7 @@
 package query
 
 import (
+	"github.com/hunick1234/phantom_mask/utils"
 	"gorm.io/gorm"
 )
 
@@ -14,20 +15,20 @@ func NewPharmacyQuery() *PharmacyQueryService {
 
 type OpenPharmacieQuery struct {
 	Time      string // 格式 HH:MM
-	DayOfWeek string // Mon...Sun（可選）
+	DayOfWeek string
 }
 
 type OpenPharmacieDTO struct {
-	ID        string
-	Name      string
-	Address   string
-	OpenHours map[string][2]string // {"Mon": ["08:00", "20:00"], ...}
+	ID        string            `json:"id"`
+	Name      string            `json:"name"`
+	Address   string            `json:"address"`
+	OpenHours utils.OpenDayTime `json:"opening_hours" gorm:"column:opening_hours;type:jsonb"`
 }
 
 func (p *PharmacyQueryService) GetOpenPharmaciesOfTime(q OpenPharmacieQuery) ([]OpenPharmacieDTO, error) {
 	var result []OpenPharmacieDTO
 
-	day := q.DayOfWeek 
+	day := q.DayOfWeek
 	timeStr := q.Time
 
 	sql := `
@@ -37,8 +38,22 @@ func (p *PharmacyQueryService) GetOpenPharmaciesOfTime(q OpenPharmacieQuery) ([]
   		$2 >= opening_hours-> $1->>0 AND
   		$2 <= opening_hours-> $1->>1
 	);`
-	
+
 	if err := p.db.Raw(sql, day, timeStr).Scan(&result).Error; err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (p *PharmacyQueryService) GetPharmacySellingMasks() ([]OpenPharmacieDTO, error) {
+	var result []OpenPharmacieDTO
+
+	sql := `
+	SELECT *
+	FROM pharmacies
+	WHERE selling_masks = true;`
+
+	if err := p.db.Raw(sql).Scan(&result).Error; err != nil {
 		return nil, err
 	}
 	return result, nil

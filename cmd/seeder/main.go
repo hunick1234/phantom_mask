@@ -12,6 +12,7 @@ import (
 	"github.com/hunick1234/phantom_mask/domain/pharmacy"
 	"github.com/hunick1234/phantom_mask/domain/transaction"
 	"github.com/hunick1234/phantom_mask/domain/user"
+	"github.com/hunick1234/phantom_mask/utils"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -91,7 +92,7 @@ func SeedPharmacies(db *gorm.DB, path string) {
 		pharmacy := pharmacy.Pharmacy{
 			Name:         rp.Name,
 			CashBalance:  rp.CashBalance,
-			OpeningHours: pharmacy.FormateOpeningHours(rp.OpeningHours),
+			OpeningHours: utils.FormateOpeningHours(rp.OpeningHours),
 		}
 
 		for _, m := range rp.Masks {
