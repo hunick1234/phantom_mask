@@ -25,9 +25,21 @@ type OpenPharmacieDTO struct {
 	OpenHours utils.OpenDayTime `json:"opening_hours" gorm:"column:opening_hours;type:jsonb"`
 }
 
+type PharmacyMasksQuery struct {
+	PharmacyID uint
+	SortBy     string
+}
+type PharmacyMasksDTO struct {
+	Id    string
+	Name  string
+	Price float64
+	Stock int
+}
+
 func (p *PharmacyQueryService) GetOpenPharmaciesOfTime(q OpenPharmacieQuery) ([]OpenPharmacieDTO, error) {
 	var result []OpenPharmacieDTO
 
+	// TODO:check query is valid
 	day := q.DayOfWeek
 	timeStr := q.Time
 
@@ -45,15 +57,17 @@ func (p *PharmacyQueryService) GetOpenPharmaciesOfTime(q OpenPharmacieQuery) ([]
 	return result, nil
 }
 
-func (p *PharmacyQueryService) GetPharmacySellingMasks() ([]OpenPharmacieDTO, error) {
-	var result []OpenPharmacieDTO
+func (p *PharmacyQueryService) GetMasksByPharmacy(query PharmacyMasksQuery) ([]PharmacyMasksDTO, error) {
+	var result []PharmacyMasksDTO
 
+	// TODO:check query is valid
 	sql := `
-	SELECT *
-	FROM pharmacies
-	WHERE selling_masks = true;`
+	SELECT id, name, price, stock
+	FROM masks
+	WHERE pharmacy_id = $1
+	ORDER BY ` + query.SortBy + ` ASC;`
 
-	if err := p.db.Raw(sql).Scan(&result).Error; err != nil {
+	if err := p.db.Raw(sql, query.PharmacyID).Scan(&result).Error; err != nil {
 		return nil, err
 	}
 	return result, nil
