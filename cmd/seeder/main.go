@@ -62,6 +62,7 @@ func main() {
 		&mask.Mask{},
 		&user.User{},
 		&transaction.Transaction{},
+		&transaction.TransactionItem{},
 	)
 
 	// Call seeder based on flag
@@ -142,13 +143,20 @@ func SeedUsers(db *gorm.DB, path string) {
 			tx := transaction.Transaction{
 				UserID:            user.ID,
 				PharmacyID:        pharmacy.ID,
-				MaskID:            mask.ID,
-				TransactionAmount: p.TransactionAmount,
 				TransactionDate:   tDate,
+				TransactionAmount: p.TransactionAmount,
+				Items: []transaction.TransactionItem{
+					{
+						MaskID:       mask.ID,
+						Quantity:     1,
+						PricePerUnit: mask.Price,
+					},
+				},
 			}
 
-			db.Create(&tx)
-
+			if err := db.Create(&tx).Error; err != nil {
+				log.Printf("create pharmacy error: %v", err)
+			}
 		}
 	}
 }
