@@ -40,20 +40,31 @@ type RawUser struct {
 
 func main() {
 	var filePath, seedType string
+	var delete bool
+
 	flag.StringVar(&seedType, "t", "", "Type of data to seed (e.g., 'user' or 'pharmacy')")
 	flag.StringVar(&filePath, "p", "", "Path to the JSON file to seed data from")
+	flag.BoolVar(&delete, "d", false, "Delete all data and return")
 	flag.Parse()
-
-	if seedType == "" || filePath == "" {
-		fmt.Println("Usage: go run main.go -t <type> -p <path>")
-		os.Exit(1)
-	}
 
 	// Connect to PostgreSQL
 	dsn := "host=localhost user=postgres password=postgres dbname=phantom_mask port=5433 sslmode=disable"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Database connection failed:", err)
+	}
+
+	if delete {
+		// Delete all data
+		if err := db.Exec("DROP TABLE pharmacies, masks, users, transactions, transaction_items CASCADE").Error; err != nil {
+			log.Fatalf("Failed to truncate tables: %v", err)
+		}
+		return
+	}
+
+	if seedType == "" || filePath == "" {
+		fmt.Println("Usage: seeder -t <type> -p <path>")
+		os.Exit(1)
 	}
 
 	// Auto migrate schema
@@ -71,6 +82,7 @@ func main() {
 		SeedPharmacies(db, filePath)
 	case "user":
 		SeedUsers(db, filePath)
+
 	default:
 		fmt.Println("Unknown seed type. Use 'pharmacy' or 'user'")
 		os.Exit(1)
@@ -145,6 +157,8 @@ func SeedUsers(db *gorm.DB, path string) {
 				PharmacyID:        pharmacy.ID,
 				TransactionDate:   tDate,
 				TransactionAmount: p.TransactionAmount,
+				Status:            "sucess",
+				Message:           "success",
 				Items: []transaction.TransactionItem{
 					{
 						MaskID:       mask.ID,

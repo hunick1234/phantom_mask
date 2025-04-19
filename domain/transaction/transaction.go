@@ -8,6 +8,8 @@ type Transaction struct {
 	PharmacyID        uint              `gorm:"index"`
 	TransactionDate   time.Time         `gorm:"not null"`
 	TransactionAmount float64           `gorm:"not null"` // total amount
+	Status            string            `gorm:"not null"` // "pending", "succese", "canceled", "failed"
+	Message           string            `gorm:"not null"` //  status message
 	Items             []TransactionItem `gorm:"foreignKey:TransactionID"`
 }
 
