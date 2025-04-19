@@ -71,7 +71,7 @@ func parseTime(date string) time.Time {
 
 func TestGetTopUsersByTransactionAmount(t *testing.T) {
 	db := setupTestUserDB(t)
-	service := &UserQueryService{DB: db}
+	service := &UserQueryService{db: db}
 
 	tests := []struct {
 		name     string

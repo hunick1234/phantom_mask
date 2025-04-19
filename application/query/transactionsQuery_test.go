@@ -52,7 +52,7 @@ func setupSummaryTestDB(t *testing.T) *gorm.DB {
 
 func TestGetTransactionSummary(t *testing.T) {
 	db := setupSummaryTestDB(t)
-	service := UserQueryService{DB: db}
+	service := TransactionQueryService{db: db}
 
 	tests := []struct {
 		testName  string

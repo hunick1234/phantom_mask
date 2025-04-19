@@ -7,13 +7,19 @@ import (
 )
 
 type UserQueryService struct {
-	DB *gorm.DB
+	db *gorm.DB
+}
+
+func NewUserQuery(db *gorm.DB) *UserQueryService {
+	return &UserQueryService{
+		db: db,
+	}
 }
 
 type TopUsersTransactionQuery struct {
-	StartDate time.Time
-	EndDate   time.Time
-	Top       int
+	StartDate time.Time `form:"start_date" time_format:"2006-01-02" binding:"required"`
+	EndDate   time.Time `form:"end_date" time_format:"2006-01-02" binding:"required,gtfield=StartDate"`
+	Top       int       `form:"top" binding:"required,min=1"`
 }
 
 type TopUserDTO struct {
@@ -21,7 +27,6 @@ type TopUserDTO struct {
 	Name        string  `json:"name"`
 	TotalAmount float64 `json:"total_amount"`
 }
-
 
 func (s *UserQueryService) GetTopUsersByTransactionAmount(q TopUsersTransactionQuery) ([]TopUserDTO, error) {
 	var results []TopUserDTO
@@ -36,7 +41,7 @@ func (s *UserQueryService) GetTopUsersByTransactionAmount(q TopUsersTransactionQ
 	LIMIT $3;
 	`
 
-	err := s.DB.Raw(sql, q.StartDate, q.EndDate,q.Top).Scan(&results).Error
+	err := s.db.Raw(sql, q.StartDate, q.EndDate, q.Top).Scan(&results).Error
 	if err != nil {
 		return nil, err
 	}

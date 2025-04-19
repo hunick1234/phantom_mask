@@ -9,13 +9,15 @@ type PharmacyQueryService struct {
 	db *gorm.DB
 }
 
-func NewPharmacyQuery() *PharmacyQueryService {
-	return &PharmacyQueryService{}
+func NewPharmacyQuery(db *gorm.DB) *PharmacyQueryService {
+	return &PharmacyQueryService{
+		db: db,
+	}
 }
 
 type OpenPharmacieQuery struct {
-	Time      string // 格式 HH:MM
-	DayOfWeek string
+	Time      string `form:"time" binding:"required,timeformat"`
+	DayOfWeek string `form:"day_of_week" binding:"required,dayofweek"`
 }
 
 type OpenPharmacieDTO struct {
@@ -26,9 +28,10 @@ type OpenPharmacieDTO struct {
 }
 
 type PharmacyMasksQuery struct {
-	PharmacyID uint
-	SortBy     string
+	PharmacyID uint   
+	SortBy     string `form:"sort_by" binding:"required,sortby"`
 }
+
 type PharmacyMasksDTO struct {
 	Id    string
 	Name  string
@@ -37,10 +40,10 @@ type PharmacyMasksDTO struct {
 }
 
 type FilterMaskCountQuery struct {
-	MinPrice   float64
-	MaxPrice   float64
-	Comparison string // "more" or "less"
-	Count      int
+	MinPrice   float64 `form:"min_price" binding:"required,min=0"`
+	MaxPrice   float64 `form:"max_price" binding:"required,min=0,gtfield=MinPrice"`
+	Comparison string  `form:"comparison" binding:"required,comparison"`
+	Count      int     `form:"count" binding:"required,min=0"`
 }
 
 type PharmacyMaskCountDTO struct {
@@ -83,7 +86,6 @@ func (p *PharmacyQueryService) GetOpenPharmaciesOfTime(q OpenPharmacieQuery) ([]
 func (p *PharmacyQueryService) GetMasksByPharmacy(query PharmacyMasksQuery) ([]PharmacyMasksDTO, error) {
 	var result []PharmacyMasksDTO
 
-	// TODO:check query is valid
 	sql := `
 	SELECT id, name, price, stock
 	FROM masks
@@ -99,7 +101,6 @@ func (p *PharmacyQueryService) GetMasksByPharmacy(query PharmacyMasksQuery) ([]P
 func (p *PharmacyQueryService) GetPharmaciesByMaskCount(query FilterMaskCountQuery) ([]PharmacyMaskCountDTO, error) {
 	var result []PharmacyMaskCountDTO
 
-	//TODO: check query is valid
 	comparisonOp := ">"
 	if query.Comparison == "less" {
 		comparisonOp = "<"

@@ -1,10 +1,24 @@
 package query
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
+
+type TransactionQueryService struct {
+	db *gorm.DB
+}
+
+func NewTransactionQueryService(db *gorm.DB) *TransactionQueryService {
+	return &TransactionQueryService{
+		db: db,
+	}
+}
 
 type TransactionSummaryQuery struct {
-	StartDate time.Time
-	EndDate   time.Time
+	StartDate time.Time `form:"start_date" time_format:"2006-01-02" binding:"required"`
+	EndDate   time.Time `form:"end_date" time_format:"2006-01-02" binding:"required,gtfield=StartDate"`
 }
 
 type TransactionSummaryDTO struct {
@@ -12,7 +26,7 @@ type TransactionSummaryDTO struct {
 	TotalAmount float64 `json:"total_amount"`
 }
 
-func (s *UserQueryService) GetTransactionSummary(q TransactionSummaryQuery) (TransactionSummaryDTO, error) {
+func (t *TransactionQueryService) GetTransactionSummary(q TransactionSummaryQuery) (TransactionSummaryDTO, error) {
 	var result TransactionSummaryDTO
 
 	sql := `
@@ -27,7 +41,7 @@ func (s *UserQueryService) GetTransactionSummary(q TransactionSummaryQuery) (Tra
 	WHERE transactions.transaction_date BETWEEN $1 AND $2) AS total_masks;
 	`
 
-	err := s.DB.Raw(sql, q.StartDate, q.EndDate).Scan(&result).Error
+	err := t.db.Raw(sql, q.StartDate, q.EndDate).Scan(&result).Error
 	if err != nil {
 		return TransactionSummaryDTO{}, err
 	}
