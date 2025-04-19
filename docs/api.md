@@ -148,6 +148,7 @@ GET /api/transactions/summary?start_date=2025-01-01&end_date=2025-01-31
 **參數**：
 - `q`（string，必填）
 - `type`（string，可選）：`pharmacy` 或 `mask`
+    - 預設為全部
 
 **輸入範例**：
 ```
@@ -161,13 +162,11 @@ GET /api/search?q=mask&type=pharmacy
     "type": "mask",
     "id": "m010",
     "name": "Kids Mask",
-    "relevance": 0.92
   },
   {
     "type": "pharmacy",
-    "id": "ph008",
-    "name": "Smile Pharmacy",
-    "relevance": 0.88
+    "id": "ph002",
+    "name": "mask Pharmacy"
   }
 ]
 ```
@@ -175,14 +174,13 @@ GET /api/search?q=mask&type=pharmacy
 ---
 
 ### 7. 處理購買交易（原子性）
-**POST** `/api/purchase`
+**POST** `/api/users/me/purchase`
 
 **描述**：使用者從藥局購買口罩，並完成扣庫存、交易紀錄等原子性資料更新。
 
 **請求格式**：
 ```json
 {
-  "user_id": "u001",
   "pharmacy_id": "ph001",
   "mask_id": "m001",
   "quantity": 5
@@ -191,9 +189,8 @@ GET /api/search?q=mask&type=pharmacy
 
 **輸入範例**：
 ```
-POST /api/purchase
+POST /api/users/me/purchase
 {
-  "user_id": "u001",
   "pharmacy_id": "ph001",
   "mask_id": "m001",
   "quantity": 5
@@ -205,6 +202,5 @@ POST /api/purchase
 {
   "transaction_id": "t123",
   "status": "success",
-  "remaining_stock": 45
 }
 ```
