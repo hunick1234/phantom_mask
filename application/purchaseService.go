@@ -119,6 +119,7 @@ func (p *purchaseService) Execute(userID, storeID, productID uint, quantity int)
 		user.Pay(totalAmount)
 		store.AddCash(totalAmount)
 		product.Stock -= quantity
+		t.TransactionAmount = totalAmount
 
 		p.userRepo.SaveWithTx(tx, &user)
 		p.storeRepo.SaveWithTx(tx, &store)
