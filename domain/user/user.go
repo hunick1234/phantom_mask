@@ -1,6 +1,8 @@
 package user
 
 import (
+	"errors"
+
 	"github.com/hunick1234/phantom_mask/domain/transaction"
 )
 
@@ -11,12 +13,13 @@ type User struct {
 	Transactions []transaction.Transaction `gorm:"foreignKey:UserID"`
 }
 
-type PurchaseInfo struct {
-	Product struct {
-		Name  string
-		Price float64
+func (u *User) CanAfford(price float64) error {
+	if u.CashBalance < price {
+		return errors.New("insufficient funds")
 	}
-	Store struct {
-		Name string
-	}
+	return nil
+}
+
+func (u *User) Pay(price float64) {
+	u.CashBalance -= price
 }

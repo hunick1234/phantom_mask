@@ -12,3 +12,7 @@ type Pharmacy struct {
 	CashBalance  float64           `json:"cashBalance" gorm:"not null"`
 	Masks        []mask.Mask       `json:"masks" gorm:"foreignKey:PharmacyID"`
 }
+
+func (p *Pharmacy) AddCash(price float64) {
+	p.CashBalance += price
+}

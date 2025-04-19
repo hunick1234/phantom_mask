@@ -2,6 +2,11 @@ package transaction
 
 import "time"
 
+const (
+	StatusPending  = "pending"
+	StatusSuccess  = "success"
+	StatusFailed   = "failed"
+)
 type Transaction struct {
 	ID                uint              `gorm:"primaryKey"`
 	UserID            uint              `gorm:"index"`
