@@ -16,6 +16,12 @@ type SearchMasksDTO struct {
 	Name string
 }
 
+func NewMasksQuery(db *gorm.DB) *MasksQuery {
+	return &MasksQuery{
+		db: db,
+	}
+}
+
 func (s *MasksQuery) SearchMasksByKeyword(q SearchMasksQuery) ([]SearchMasksDTO, error) {
 	var result []SearchMasksDTO
 
