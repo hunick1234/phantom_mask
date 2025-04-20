@@ -1,0 +1,10 @@
+*.exe
+*.exe~
+.vscode
+*.log
+*.env
+
+/cmd/playground/
+
+# go build
+/cmd/seeder/seeder
