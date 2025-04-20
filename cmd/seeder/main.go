@@ -8,6 +8,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/hunick1234/phantom_mask/config"
 	"github.com/hunick1234/phantom_mask/domain/mask"
 	"github.com/hunick1234/phantom_mask/domain/pharmacy"
 	"github.com/hunick1234/phantom_mask/domain/transaction"
@@ -48,7 +49,7 @@ func main() {
 	flag.Parse()
 
 	// Connect to PostgreSQL
-	dsn := "host=localhost user=postgres password=postgres dbname=phantom_mask port=5433 sslmode=disable"
+	dsn := config.LoadConfig().DB.ToDSN()
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Database connection failed:", err)
