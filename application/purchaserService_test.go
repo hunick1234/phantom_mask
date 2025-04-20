@@ -23,6 +23,8 @@ func setupPurchaseTestDB(t *testing.T) *gorm.DB {
 	if err != nil {
 		t.Fatalf("failed to connect to PostgreSQL: %v", err)
 	}
+	db.Exec("DROP TABLE IF EXISTS transaction_items, transactions, masks, users, pharmacies CASCADE")
+	db.AutoMigrate(&user.User{}, &pharmacy.Pharmacy{}, &mask.Mask{}, &transaction.Transaction{}, &transaction.TransactionItem{})
 
 	return db
 }
@@ -61,7 +63,6 @@ func TestPurchaseServiceExecute(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			db.Exec("TRUNCATE TABLE transaction_items, transactions, masks, users, pharmacies CASCADE")
-
 			u := user.User{ID: 1, CashBalance: c.userBalance}
 			p := pharmacy.Pharmacy{ID: 1, CashBalance: c.pharmacyBalance}
 			m := mask.Mask{ID: 1, Name: "Mask A", Stock: c.maskStock, Price: c.maskPrice, PharmacyID: 1}
@@ -107,7 +108,7 @@ func TestConcurrentPurchase(t *testing.T) {
 
 	db.Create(&user.User{ID: 1, CashBalance: 100})
 	db.Create(&pharmacy.Pharmacy{ID: 1, CashBalance: 0})
-	db.Create(&mask.Mask{ID: 1, Price: 10, Stock: 1, PharmacyID: 1}) // 只有 1 片口罩
+	db.Create(&mask.Mask{ID: 1, Name: "Mask A", Stock: 1, Price: 10.0, PharmacyID: 1}) // 只有 1 片口罩
 
 	var wg sync.WaitGroup
 	results := make(chan string, 2)

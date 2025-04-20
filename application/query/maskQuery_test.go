@@ -22,8 +22,7 @@ func setupTestMaskDB(t *testing.T) *gorm.DB {
 		id SERIAL PRIMARY KEY,
 		name TEXT,
 		price FLOAT,
-		stock INT,
-		pharmacy_id SERIAL REFERENCES pharmacies(id)
+		stock INT
 	);
 	`
 
@@ -33,15 +32,15 @@ func setupTestMaskDB(t *testing.T) *gorm.DB {
 	}
 
 	testData := `
-	INSERT INTO masks (id, name, price,stock, pharmacy_id) VALUES
-	('1','Mask A', 10.0, '1', '1'),
-	('33','Mask c', 25.0, '1', '1'),
-	('22','Mask B', 15.0, '1', '1'),
-	('44','Mask d', 5.0, '2', '1'),
+	INSERT INTO masks (id, name, price,stock) VALUES
+	('1','Mask A', 10.0, '1'),
+	('33','Mask c', 25.0, '1'),
+	('22','Mask B', 15.0, '1'),
+	('44','Mask d', 5.0, '2'),
 	
-	('3','nick C', 20.0, '1', '2'),
-	('4','yuck D', 25.0, '1', '3'),
-	('5','hex E', 30.0, '1', '4');
+	('3','nick C', 20.0, '1'),
+	('4','yuck D', 25.0, '1'),
+	('5','hex E', 30.0, '1');
 	`
 	err = db.Exec(testData).Error
 	if err != nil {

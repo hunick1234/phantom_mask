@@ -19,8 +19,7 @@ func setupTestUserDB(t *testing.T) *gorm.DB {
 	}
 
 	schema := `
-	DROP TABLE IF EXISTS transactions;
-	DROP TABLE IF EXISTS users;
+	DROP TABLE IF EXISTS transactions, users CASCADE;
 	CREATE TABLE users (
 		id SERIAL PRIMARY KEY,
 		name TEXT NOT NULL,
