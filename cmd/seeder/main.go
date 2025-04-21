@@ -158,7 +158,7 @@ func SeedUsers(db *gorm.DB, path string) {
 				PharmacyID:        pharmacy.ID,
 				TransactionDate:   tDate,
 				TransactionAmount: p.TransactionAmount,
-				Status:            "sucess",
+				Status:            "success",
 				Message:           "success",
 				Items: []transaction.TransactionItem{
 					{

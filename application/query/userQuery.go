@@ -35,7 +35,7 @@ func (s *UserQueryService) GetTopUsersByTransactionAmount(q TopUsersTransactionQ
 	SELECT users.id as user_id, users.name, SUM(transactions.transaction_amount) as total_amount
 	FROM transactions
 	JOIN users ON users.id = transactions.user_id
-	WHERE transactions.transaction_date BETWEEN $1 AND $2
+	WHERE transactions.transaction_date BETWEEN $1 AND $2  AND transactions.status = 'success'
 	GROUP BY users.id, users.name
 	ORDER BY total_amount DESC
 	LIMIT $3;

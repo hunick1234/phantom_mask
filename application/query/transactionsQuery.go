@@ -33,12 +33,12 @@ func (t *TransactionQueryService) GetTransactionSummary(q TransactionSummaryQuer
 	SELECT
 	(SELECT SUM(transaction_amount)
 	FROM transactions
-	WHERE transaction_date BETWEEN $1 AND $2) AS total_amount,
+	WHERE transaction_date BETWEEN $1 AND $2 AND status = 'success') AS total_amount,
 
 	(SELECT SUM(transaction_items.quantity)
 	FROM transaction_items
     JOIN transactions ON  transactions.id = transaction_items.transaction_id
-	WHERE transactions.transaction_date BETWEEN $1 AND $2) AS total_masks;
+	WHERE transactions.transaction_date BETWEEN $1 AND $2 AND transactions.status = 'success') AS total_masks;
 	`
 
 	err := t.db.Raw(sql, q.StartDate, q.EndDate).Scan(&result).Error
