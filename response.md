@@ -1,73 +1,55 @@
-# Response
-> The Current content is an **example template**; please edit it to fit your style and content.
-## A. Required Information
-### A.1. Requirement Completion Rate
-- [x] List all pharmacies open at a specific time and on a day of the week if requested.
-  - Implemented at xxx API.
-- [x] List all masks sold by a given pharmacy, sorted by mask name or price.
-  - Implemented at xxx API.
-- [x] List all pharmacies with more or less than x mask products within a price range.
-  - Implemented at xxx API.
-- [x] The top x users by total transaction amount of masks within a date range.
-  - Implemented at xxx API.
-- [x] The total number of masks and dollar value of transactions within a date range.
-  - Implemented at xxx API.
-- [x] Search for pharmacies or masks by name, ranked by relevance to the search term.
-  - Implemented at xxx API.
-- [x] Process a user purchases a mask from a pharmacy, and handle all relevant data changes in an atomic transaction.
-  - Implemented at xxx API.
-### A.2. API Document
-> Please describe how to use the API in the API documentation. You can edit by any format (e.g., Markdown or OpenAPI) or free tools (e.g., [hackMD](https://hackmd.io/), [postman](https://www.postman.com/), [google docs](https://docs.google.com/document/u/0/), or  [swagger](https://swagger.io/specification/)).
+# 回應文件（Response）
 
-Import [this](#api-document) json file to Postman.
+## A. 必要資訊
 
-### A.3. Import Data Commands
-Please run these two script commands to migrate the data into the database.
+### A.1. 任務完成度
 
-```bash
-$ rake import_data:pharmacies[PATH_TO_FILE]
-$ rake import_data:users[PATH_TO_FILE]
+- [x] 查詢指定時間與星期幾營業的藥局  
+       ➤ API：`GET /api/pharmacies/open`
+- [x] 查詢指定藥局販售的口罩，並依名稱或價格排序  
+       ➤ API：`GET /api/pharmacies/{pharmacy_id}/masks`
+- [x] 查詢價格範圍內，口罩數量多於或少於指定數量的藥局  
+       ➤ API：`GET /api/pharmacies/filter_by_mask_count`
+- [x] 查詢指定時間區間內購買金額最高的前 x 名使用者  
+       ➤ API：`GET /api/users/top_transactions`
+- [x] 查詢指定期間內總交易金額與口罩數量  
+       ➤ API：`GET /api/transactions/summary`
+- [x] 以關鍵字搜尋藥局或口罩，依關聯度排序  
+       ➤ API：`GET /api/search`
+- [x] 使用者購買口罩  
+       ➤ API：`POST /api/users/me/purchase`
+
+### A.2. API 文件
+
+- 位置：`docs/api.md`
+- postman collection：`docs/Pharmacy.postman_collection.json`
+
+### A.3. 匯入資料指令
+
+```go
+$ go build -o seeder cmd/seeder/main.go
 ```
-## B. Bonus Information
-
->  If you completed the bonus requirements, please fill in your task below.
-### B.1. Test Coverage Report
-
-I wrote down the 20 unit tests for the APIs I built. Please check the test coverage report at [here](#test-coverage-report).
-
-You can run the test script by using the command below:
-
+請依下列順序匯入初始資料：
 ```bash
-bundle exec rspec spec
+$ ./seeder -t pharmacy -p data/pharmacies.json
+$ ./seeder -t user -p data/users.json
 ```
 
-### B.2. Dockerized
-Please check my Dockerfile / docker-compose.yml at [here](#dockerized).
+---
 
-On the local machine, please follow the commands below to build it.
+## B. 加分項目
+### B.1 Docker
+
+- 提供 `Dockerfile` 與 `docker-compose.yml`
+- 使用 `.env.example` 自動讀取環境變數
+- 啟動專案與資料庫一鍵完成：
 
 ```bash
-$ docker build --build-arg ENV=development -p 80:3000 -t my-project:1.0.0 .  
-$ docker-compose up -d
+$ cp .env.example .env
+$ docker compose up --build 
 
-# go inside the container, run the migrate data command.
-$ docker exec -it my-project bash
-$ rake import_data:pharmacies[PATH_TO_FILE] 
-$ rake import_data:user[PATH_TO_FILE]
 ```
 
-### B.3. Demo Site Url
+資料將自動透過 `init.sh` 導入。
 
-The demo site is ready on [my AWS demo site](#demo-site-url); you can try any APIs on this demo site.
-
-## C. Other Information
-
-### C.1. ERD
-
-My ERD [erd-link](#erd-link).
-
-### C.2. Technical Document
-
-For frontend programmer reading, please check this [technical document](technical-document) to know how to operate those APIs.
-
-- --
+---

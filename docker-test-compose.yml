@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: phantom-mask-testdb
+    ports:
+      - "5435:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: testdb
+
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "user" ]
+      interval: 3s
+      timeout: 5s
+      retries: 5

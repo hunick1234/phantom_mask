@@ -1,0 +1,728 @@
+{
+  "info": {
+    "_postman_id": "b33b9c29-abd2-4add-b019-52b806c6b7fe",
+    "name": "phantom_mask API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "15333388"
+  },
+  "item": [
+    {
+      "name": "User Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const data = pm.response.json();",
+              "pm.collectionVariables.set(\"jwt_token\", data.token);"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": 2\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/users/login",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "users",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "User Purchase",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"pharmacy_id\": 1,\n  \"mask_id\": 5,\n  \"quantity\": 1\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8081/api/users/me/purchase",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8081",
+          "path": [
+            "api",
+            "users",
+            "me",
+            "purchase"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Open Pharmacies",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8081/api/pharmacies/open?time=09:00&day_of_week=Mon",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8081",
+          "path": [
+            "api",
+            "pharmacies",
+            "open"
+          ],
+          "query": [
+            {
+              "key": "time",
+              "value": "09:00"
+            },
+            {
+              "key": "day_of_week",
+              "value": "Mon"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Masks by Pharmacy",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8081/api/pharmacies/1/masks?sort_by=price",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8081",
+          "path": [
+            "api",
+            "pharmacies",
+            "1",
+            "masks"
+          ],
+          "query": [
+            {
+              "key": "sort_by",
+              "value": "price"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Filter Pharmacies by Mask Count",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8081/api/pharmacies/filter_by_mask_count?min_price=2.0&max_price=10.0&comparison=more&count=3",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8081",
+          "path": [
+            "api",
+            "pharmacies",
+            "filter_by_mask_count"
+          ],
+          "query": [
+            {
+              "key": "min_price",
+              "value": "2.0"
+            },
+            {
+              "key": "max_price",
+              "value": "10.0"
+            },
+            {
+              "key": "comparison",
+              "value": "more"
+            },
+            {
+              "key": "count",
+              "value": "3"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Search Pharmacies or Masks",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8081/api/search?q=m&type=pharmacy",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8081",
+          "path": [
+            "api",
+            "search"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "m"
+            },
+            {
+              "key": "type",
+              "value": "pharmacy"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Top Transaction Users",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8081/api/users/top_transactions?start_date=2021-01-01&end_date=2025-01-31&top=10",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8081",
+          "path": [
+            "api",
+            "users",
+            "top_transactions"
+          ],
+          "query": [
+            {
+              "key": "start_date",
+              "value": "2021-01-01"
+            },
+            {
+              "key": "end_date",
+              "value": "2025-01-31"
+            },
+            {
+              "key": "top",
+              "value": "10"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Transaction Summary",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8081/api/transactions/summary?start_date=2021-01-01&end_date=2025-06-24",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8081",
+          "path": [
+            "api",
+            "transactions",
+            "summary"
+          ],
+          "query": [
+            {
+              "key": "start_date",
+              "value": "2021-01-01"
+            },
+            {
+              "key": "end_date",
+              "value": "2025-06-24"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login - success",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/users/login",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "users",
+            "login"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": 1\n}"
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login - missing user_id",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/users/login",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "users",
+            "login"
+          ],
+          "query": []
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expect 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login - invalid user_id",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/users/login",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "users",
+            "login"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": \"abc\"\n}"
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expect 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Purchase - success",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/users/me/purchase",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "users",
+            "me",
+            "purchase"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"pharmacy_id\": 1,\n  \"mask_id\": 1,\n  \"quantity\": 1\n}"
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Purchase - no JWT",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/users/me/purchase",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "users",
+            "me",
+            "purchase"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"pharmacy_id\": 1,\n  \"mask_id\": 1,\n  \"quantity\": 1\n}"
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expect 401\", () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Purchase - invalid mask_id",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/users/me/purchase",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "users",
+            "me",
+            "purchase"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"pharmacy_id\": 1,\n  \"mask_id\": 9999,\n  \"quantity\": 1\n}"
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expect 400 or error message\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invalid time format for Get Open Pharmacies",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/api/pharmacies/open?time=99:99&day_of_week=Monday",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "pharmacies",
+            "open"
+          ],
+          "query": [
+            {
+              "key": "time",
+              "value": "99:99"
+            },
+            {
+              "key": "day_of_week",
+              "value": "Monday"
+            }
+          ]
+        },
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expect 400 for invalid time\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Missing day_of_week for Open Pharmacies",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/api/pharmacies/open?time=09:00",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "pharmacies",
+            "open"
+          ],
+          "query": [
+            {
+              "key": "time",
+              "value": "09:00"
+            }
+          ]
+        },
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expect 400 for missing day_of_week\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invalid sort_by for Get Masks by Pharmacy",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/api/pharmacies/1/masks?sort_by=abc",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "pharmacies",
+            "1",
+            "masks"
+          ],
+          "query": [
+            {
+              "key": "sort_by",
+              "value": "abc"
+            }
+          ]
+        },
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expect 400 for invalid sort_by\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invalid comparison parameter for Filter Pharmacies",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/api/pharmacies/filter_by_mask_count?min_price=2&max_price=10&comparison=invalid&count=3",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "pharmacies",
+            "filter_by_mask_count"
+          ],
+          "query": [
+            {
+              "key": "min_price",
+              "value": "2"
+            },
+            {
+              "key": "max_price",
+              "value": "10"
+            },
+            {
+              "key": "comparison",
+              "value": "invalid"
+            },
+            {
+              "key": "count",
+              "value": "3"
+            }
+          ]
+        },
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expect 400 for invalid comparison\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "jwt_token",
+      "value": ""
+    },
+    {
+      "key": "base_url",
+      "value": "http://localhost:8081"
+    }
+  ]
+}
