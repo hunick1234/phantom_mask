@@ -1,28 +1,33 @@
-## 藥局口罩系統 API 規格說明
+# Phantom Mask API 文件
 
-### 1. 查詢營業中藥局
+---
+
+## 1. 查詢營業中藥局
+
 **GET** `/api/pharmacies/open`
 
-**描述**：列出在指定時間與星期幾營業的藥局。
+| 參數          | 類型   | 是否必填 | 說明                                    |
+| ------------- | ------ | -------- | --------------------------------------- |
+| `time`        | string | ✅       | 時間，格式為 `HH:MM`                    |
+| `day_of_week` | string | ✅       | 星期幾（Mon,Tue,Wed,Thur,Fru,,Sat,Sun） |
 
-**參數**：
-- `time`（string，必填）：格式 `HH:MM`
-- `day_of_week`（string，必填）：如 `Monday`、`Sunday`
+📦 範例：
 
-**輸入範例**：
 ```
-GET /api/pharmacies/open?time=09:00&day_of_week=Monday
+GET /api/pharmacies/open?time=10:00&day_of_week=Mon
 ```
 
-**回傳格式**：
+- response:
+
 ```json
 [
   {
-    "id": "ph001",
-    "name": "Health Pharmacy",
+    "id": "1",
+    "name": "DFW Wellness",
     "address": "123 Main St",
-    "open_hours": {
-      "Monday": ["08:00", "18:00"]
+    "opening_hours": {
+      "Mon": ["08:00", "12:00"],
+      "Tue": ["14:00", "18:00"]
     }
   }
 ]
@@ -30,177 +35,227 @@ GET /api/pharmacies/open?time=09:00&day_of_week=Monday
 
 ---
 
-### 2. 查詢藥局販售的口罩（排序）
+## 2. 查詢藥局販售的口罩
+
 **GET** `/api/pharmacies/{pharmacy_id}/masks`
 
-**描述**：列出指定藥局販售的所有口罩，並依名稱或價格排序。
+| 參數      | 類型   | 是否必填 | 說明              |
+| --------- | ------ | -------- | ----------------- |
+| `sort_by` | string | ✅       | `name` 或 `price` |
 
-**參數**：
-- `pharmacy_id`（path 參數）
-- `sort_by`（query 參數，可選）：`name` 或 `price` 
-    - 預設為 `name`
+📦 範例：
 
-**輸入範例**：
 ```
-GET /api/pharmacies/ph001/masks?sort_by=price
+GET /api/pharmacies/1/masks?sort_by=price
 ```
 
-**回傳格式**：
+- response:
+
 ```json
 [
   {
-    "mask_id": "m001",
-    "name": "Blue Surgical Mask",
-    "price": 5.0,
-    "stock": 100
+    "id": "10",
+    "name": "MaskT (green) (10 per pack)",
+    "price": 41.86,
+    "stock": 50
+  },
+  {
+    "id": "11",
+    "name": "Second Smile (black) (3 per pack)",
+    "price": 5.84,
+    "stock": 80
   }
 ]
 ```
 
 ---
 
-### 3. 查詢口罩數量門檻的藥局（價格範圍）
+## 3. 查詢符合條件的藥局（依口罩數量）
+
 **GET** `/api/pharmacies/filter_by_mask_count`
 
-**描述**：篩選在指定價格範圍中，販售口罩數量多於/少於 x 件的藥局。
+| 參數         | 類型   | 是否必填 | 說明             |
+| ------------ | ------ | -------- | ---------------- |
+| `min_price`  | float  | ✅       | 價格下限         |
+| `max_price`  | float  | ✅       | 價格上限         |
+| `comparison` | string | ✅       | `more` 或 `less` |
+| `count`      | int    | ✅       | 數量門檻         |
 
-**參數**：
-- `min_price`（float）
-- `max_price`（float）
-- `comparison`（string）：`more` 或 `less`
-- `count`（int）
+📦 範例：
 
-**輸入範例**：
 ```
-GET /api/pharmacies/filter_by_mask_count?min_price=2.0&max_price=10.0&comparison=more&count=50
+GET /api/pharmacies/filter_by_mask_count?min_price=5&max_price=30&comparison=more&count=3
 ```
 
-**回傳格式**：
+- response:
+
 ```json
 [
   {
-    "id": "ph003",
+    "id": "3",
     "name": "GreenCare Pharmacy",
-    "mask_count": 12
+    "mask_count": 5
   }
 ]
 ```
 
 ---
 
-### 4. 交易金額最高前 x 名使用者
+## 4. 查詢交易金額前 N 名使用者
+
 **GET** `/api/users/top_transactions`
 
-**描述**：查詢指定期間內購買金額最高的前 x 名使用者。
+| 參數         | 類型   | 是否必填 | 說明                 |
+| ------------ | ------ | -------- | -------------------- |
+| `start_date` | string | ✅       | 起始日（YYYY-MM-DD） |
+| `end_date`   | string | ✅       | 結束日               |
+| `top`        | int    | ✅       | 顯示幾名使用者       |
 
-**參數**：
-- `start_date`（YYYY-MM-DD）
-- `end_date`（YYYY-MM-DD）
-- `top`（int）
+📦 範例：
 
-**輸入範例**：
 ```
-GET /api/users/top_transactions?start_date=2025-01-01&end_date=2025-01-31&top=5
+GET /api/users/top_transactions?start_date=2025-01-01&end_date=2025-01-31&top=3
 ```
 
-**回傳格式**：
+- response:
+
 ```json
 [
-  {
-    "user_id": "u001",
-    "name": "Alice",
-    "total_amount": 150.0
-  }
+  [
+    {
+      "user_id": "2",
+      "name": "Ada Larson",
+      "total_amount": 143.12
+    },
+    {
+      "user_id": "4",
+      "name": "Lester Arnold",
+      "total_amount": 136.84
+    }
+  ]
 ]
 ```
 
 ---
 
-### 5. 查詢交易總數與金額
+## 5. 查詢總交易口罩數與金額
+
 **GET** `/api/transactions/summary`
 
-**描述**：查詢某期間內交易總口罩數量與金額。
+| 參數         | 類型   | 是否必填 | 說明                  |
+| ------------ | ------ | -------- | --------------------- |
+| `start_date` | string | ✅       | 起始日（YYYY-MM-DD）  |
+| `end_date`   | string | ✅       | 結束日 （YYYY-MM-DD） |
 
-**參數**：
-- `start_date`（YYYY-MM-DD）
-- `end_date`（YYYY-MM-DD）
+📦 範例：
 
-**輸入範例**：
 ```
 GET /api/transactions/summary?start_date=2025-01-01&end_date=2025-01-31
 ```
 
-**回傳格式**：
+- response:
+
 ```json
 {
-  "total_masks": 1000,
-  "total_amount": 5000.0
+  "total_amount": 279.96,
+  "total_masks": 10
 }
 ```
 
 ---
 
-### 6. 關鍵字搜尋藥局或口罩
+## 6. 關鍵字搜尋藥局與口罩
+
 **GET** `/api/search`
 
-**描述**：以關鍵字搜尋藥局或口罩，並依關聯度排序。
+| 參數 | 類型   | 是否必填 | 說明       |
+| ---- | ------ | -------- | ---------- |
+| `q`  | string | ✅       | 搜尋關鍵字 |
 
-**參數**：
-- `q`（string，必填）
-- `type`（string，可選）：`pharmacy` 或 `mask`
-    - 預設為全部
+📦 範例：
 
-**輸入範例**：
 ```
-GET /api/search?q=mask&type=pharmacy
+GET /api/search?q=blue
 ```
 
-**回傳格式**：
+- response:
+
 ```json
 [
   {
+    "id": "1",
     "type": "mask",
-    "id": "m010",
-    "name": "Kids Mask",
+    "name": "Second Smile (blue) (10 per pack)"
   },
   {
+    "id": "5",
     "type": "pharmacy",
-    "id": "ph002",
-    "name": "mask Pharmacy"
+    "name": "blue Mask Warehouse"
   }
 ]
 ```
 
 ---
 
-### 7. 處理購買交易（原子性）
+## 7. 購買口罩（需登入）
+
 **POST** `/api/users/me/purchase`
 
-**描述**：使用者從藥局購買口罩，並完成扣庫存、交易紀錄等原子性資料更新。
+🔒 需附上 Authorization: `Bearer <JWT>`
 
-**請求格式**：
+| 欄位          | 類型 | 是否必填 | 說明     |
+| ------------- | ---- | -------- | -------- |
+| `pharmacy_id` | uint | ✅       | 藥局 ID  |
+| `mask_id`     | uint | ✅       | 口罩 ID  |
+| `quantity`    | int  | ✅       | 購買數量 |
+
+📦 範例：
+
 ```json
-{
-  "pharmacy_id": "ph001",
-  "mask_id": "m001",
-  "quantity": 5
-}
-```
-
-**輸入範例**：
-```
 POST /api/users/me/purchase
+Authorization: Bearer <token>
+
 {
-  "pharmacy_id": "ph001",
-  "mask_id": "m001",
-  "quantity": 5
+  "pharmacy_id": 2,
+  "mask_id": 5,
+  "quantity": 3
 }
 ```
 
-**回傳格式**：
+- response:
+
 ```json
 {
-  "transaction_id": "t123",
-  "status": "success",
+  "transaction_id": 101,
+  "status": "success"
 }
 ```
+
+---
+
+## 8. 登入以取得 JWT（測試用）
+
+**POST** `/api/users/login`
+
+| 欄位      | 類型 | 是否必填 | 說明              |
+| --------- | ---- | -------- | ----------------- |
+| `user_id` | uint | ✅       | 測試用的使用者 ID |
+
+📦 範例：
+
+```
+POST /api/users/login
+{
+  "user_id": 1
+}
+```
+
+- response:
+
+```json
+{
+  "token": "xxx.yyy.zzz"
+}
+```
+
+---
