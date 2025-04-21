@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hunick1234/phantom_mask/domain/transaction"
+	"github.com/hunick1234/phantom_mask/domain/user"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -17,47 +19,42 @@ func setupTestUserDB(t *testing.T) *gorm.DB {
 	if err != nil {
 		t.Fatalf("failed to connect to PostgreSQL: %v", err)
 	}
-
-	schema := `
-	DROP TABLE IF EXISTS transactions, users CASCADE;
-	CREATE TABLE users (
-		id SERIAL PRIMARY KEY,
-		name TEXT NOT NULL,
-		cash_balance FLOAT NOT NULL
-	);
-	CREATE TABLE transactions (
-		id SERIAL PRIMARY KEY,
-		user_id INT REFERENCES users(id),
-		transaction_date DATE NOT NULL,
-		transaction_amount FLOAT NOT NULL
-	);
-	`
-
-	err = db.Exec(schema).Error
+	err = db.Exec("DROP TABLE IF EXISTS transactions, users CASCADE").Error
 	if err != nil {
-		t.Fatalf("failed to create schema: %v", err)
+		t.Fatalf("failed to drop tables: %v", err)
 	}
 
-	testData := `
-	INSERT INTO users (id, name, cash_balance) VALUES
-	(1, 'Alice', 100.0),
-	(2, 'Bob', 200.0),
-	(3, 'Charlie', 300.0),
-	(4, 'David', 400.0);
-	INSERT INTO TRANSACTIONS (id, user_id, transaction_date, transaction_amount) VALUES
-	(1, 1, '2022-01-01', 50.0),
-	(2, 1, '2023-01-02', 30.0),
-	(9, 1, '2025-01-03', 100.0),
-	(3, 2, '2023-01-01', 20.0),
-	(4, 2, '2023-01-03', 110.0),
-	(10, 2, '2025-01-04', 110.0),
-	(5, 3, '2023-01-02', 100.0),
-	(6, 3, '2023-01-04', 70.0),
-	(8, 4, '2025-01-05', 90.0);
-	`
-	err = db.Exec(testData).Error
+	err = db.AutoMigrate(&user.User{}, &transaction.Transaction{})
 	if err != nil {
-		t.Fatalf("failed to insert test data: %v", err)
+		t.Fatalf("failed to auto migrate schema: %v", err)
+	}
+
+	// 建立使用者
+	users := []user.User{
+		{ID: 1, Name: "Alice", CashBalance: 100.0},
+		{ID: 2, Name: "Bob", CashBalance: 200.0},
+		{ID: 3, Name: "Charlie", CashBalance: 300.0},
+		{ID: 4, Name: "David", CashBalance: 400.0},
+	}
+	if err := db.Create(&users).Error; err != nil {
+		t.Fatalf("failed to create users: %v", err)
+	}
+
+	// 建立交易
+	transactions := []transaction.Transaction{
+		{ID: 1, UserID: 1, TransactionDate: parseTime("2022-01-01"), TransactionAmount: 50.0, Status: "success"},
+		{ID: 2, UserID: 1, TransactionDate: parseTime("2023-01-02"), TransactionAmount: 30.0, Status: "success"},
+		{ID: 9, UserID: 1, TransactionDate: parseTime("2025-01-03"), TransactionAmount: 100.0, Status: "success"},
+		{ID: 3, UserID: 2, TransactionDate: parseTime("2023-01-01"), TransactionAmount: 20.0, Status: "success"},
+		{ID: 4, UserID: 2, TransactionDate: parseTime("2023-01-03"), TransactionAmount: 110.0, Status: "success"},
+		{ID: 10, UserID: 2, TransactionDate: parseTime("2025-01-04"), TransactionAmount: 110.0, Status: "success"},
+		{ID: 5, UserID: 3, TransactionDate: parseTime("2023-01-02"), TransactionAmount: 100.0, Status: "success"},
+		{ID: 6, UserID: 3, TransactionDate: parseTime("2023-01-04"), TransactionAmount: 70.0, Status: "success"},
+		{ID: 8, UserID: 4, TransactionDate: parseTime("2025-01-05"), TransactionAmount: 90.0, Status: "success"},
+	}
+
+	if err := db.Create(&transactions).Error; err != nil {
+		t.Fatalf("failed to create transactions: %v", err)
 	}
 
 	return db

@@ -5,6 +5,9 @@ import (
 
 	"slices"
 
+	"github.com/hunick1234/phantom_mask/domain/mask"
+	"github.com/hunick1234/phantom_mask/domain/pharmacy"
+	"github.com/hunick1234/phantom_mask/utils"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -17,52 +20,44 @@ func setupTestDB(t *testing.T) *gorm.DB {
 	if err != nil {
 		t.Fatalf("failed to connect to PostgreSQL: %v", err)
 	}
-
-	schema := `
-	DROP TABLE IF EXISTS masks;
-	DROP TABLE IF EXISTS pharmacies;
-	CREATE TABLE pharmacies (
-		id SERIAL PRIMARY KEY,
-		name TEXT,
-		address TEXT,
-		opening_hours JSONB
-	);
-	CREATE TABLE masks (
-		id SERIAL PRIMARY KEY,
-		name TEXT,
-		price FLOAT,
-		stock INT,
-		pharmacy_id SERIAL REFERENCES pharmacies(id)
-	);
-	`
-
-	err = db.Exec(schema).Error
+	err = db.Exec("DROP TABLE IF EXISTS masks, pharmacies CASCADE").Error
 	if err != nil {
-		t.Fatalf("failed to create schema: %v", err)
+		t.Fatalf("failed to drop tables: %v", err)
+	}
+	err = db.AutoMigrate(&pharmacy.Pharmacy{}, &mask.Mask{})
+	if err != nil {
+		t.Fatalf("failed to auto migrate schema: %v", err)
 	}
 
-	testData := `
-	INSERT INTO pharmacies (id, name, address, opening_hours) VALUES 
-	('1', 'Pharmacy A', 'Address A', '{"Mon": ["08:00", "20:00"]}'),
-	('2', 'Pharmacy B', 'Address B', '{"Mon": ["10:00", "22:00"]}'),
-	('3', 'Pharmacy C', 'Address C', '{"Tue": ["09:00", "18:00"]}'),
-	('4', 'Pharmacy D', 'Address D', '{"Wed": ["08:00", "20:00"]}'),
-	('5', 'Pharmacy E', 'Address E', '{"Thu": ["10:00", "22:00"]}'),
-	('6', 'Pharmacy F', 'Address F', '{"Thu": ["09:00", "18:00"], "Sat": ["10:00", "22:00"], "Sun":["10:00", "12:00"]}');
-	
-	INSERT INTO masks (id, name, price,stock, pharmacy_id) VALUES
-	('1','Mask A', 10.0, '1', '1'),
-	('33','Mask c', 25.0, '1', '1'),
-	('22','Mask B', 15.0, '1', '1'),
-	('44','Mask d', 5.0, '2', '1'),
-	
-	('3','Mask C', 20.0, '1', '2'),
-	('4','Mask D', 25.0, '1', '3'),
-	('5','Mask E', 30.0, '1', '4');
-	`
-	err = db.Exec(testData).Error
+	// Insert test data
+	pharmacies := []pharmacy.Pharmacy{
+		{ID: 1, Name: "Pharmacy A", OpeningHours: utils.OpenDayTime{"Mon": {"08:00", "20:00"}}},
+		{ID: 2, Name: "Pharmacy B", OpeningHours: utils.OpenDayTime{"Mon": {"10:00", "22:00"}}},
+		{ID: 3, Name: "Pharmacy C", OpeningHours: utils.OpenDayTime{"Tue": {"09:00", "18:00"}}},
+		{ID: 4, Name: "Pharmacy D", OpeningHours: utils.OpenDayTime{"Wed": {"08:00", "20:00"}}},
+		{ID: 5, Name: "Pharmacy E", OpeningHours: utils.OpenDayTime{"Thu": {"10:00", "22:00"}}},
+		{ID: 6, Name: "Pharmacy F", OpeningHours: utils.OpenDayTime{"Thu": {"09:00", "18:00"}, "Sat": {"10:00", "22:00"}, "Sun": {"10:00", "12:00"}}},
+	}
+	err = db.Create(&pharmacies).Error
 	if err != nil {
-		t.Fatalf("failed to insert test data: %v", err)
+		t.Fatalf("failed to insert pharmacies: %v", err)
+	}
+
+	masks := []mask.Mask{
+
+		{Name: "Mask A", Price: 2.0, Stock: 1, PharmacyID: 1},
+		{Name: "Mask B", Price: 10.0, Stock: 1, PharmacyID: 1},
+		{Name: "Mask C", Price: 10.0, Stock: 1, PharmacyID: 1},
+		{Name: "Mask D", Price: 25.0, Stock: 1, PharmacyID: 1},
+		{Name: "Mask C", Price: 20.0, Stock: 1, PharmacyID: 2},
+		{Name: "Mask D", Price: 25.0, Stock: 1, PharmacyID: 3},
+		{Name: "Mask E", Price: 30.0, Stock: 1, PharmacyID: 4},
+		{Name: "Mask F", Price: 35.0, Stock: 1, PharmacyID: 5},
+		{Name: "Mask G", Price: 40.0, Stock: 1, PharmacyID: 6},
+	}
+	err = db.Create(&masks).Error
+	if err != nil {
+		t.Fatalf("failed to insert masks: %v", err)
 	}
 
 	return db

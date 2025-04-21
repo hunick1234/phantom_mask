@@ -3,6 +3,7 @@ package query
 import (
 	"testing"
 
+	"github.com/hunick1234/phantom_mask/domain/mask"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -15,36 +16,28 @@ func setupTestMaskDB(t *testing.T) *gorm.DB {
 	if err != nil {
 		t.Fatalf("failed to connect to PostgreSQL: %v", err)
 	}
-
-	schema := `
-	DROP TABLE IF EXISTS masks;
-	CREATE TABLE masks (
-		id SERIAL PRIMARY KEY,
-		name TEXT,
-		price FLOAT,
-		stock INT
-	);
-	`
-
-	err = db.Exec(schema).Error
+	err = db.Exec("DROP TABLE IF EXISTS masks CASCADE").Error
 	if err != nil {
-		t.Fatalf("failed to create schema: %v", err)
+		t.Fatalf("failed to drop tables: %v", err)
 	}
+	err = db.AutoMigrate(&mask.Mask{})
 
-	testData := `
-	INSERT INTO masks (id, name, price,stock) VALUES
-	('1','Mask A', 10.0, '1'),
-	('33','Mask c', 25.0, '1'),
-	('22','Mask B', 15.0, '1'),
-	('44','Mask d', 5.0, '2'),
-	
-	('3','nick C', 20.0, '1'),
-	('4','yuck D', 25.0, '1'),
-	('5','hex E', 30.0, '1');
-	`
-	err = db.Exec(testData).Error
 	if err != nil {
-		t.Fatalf("failed to insert test data: %v", err)
+		t.Fatalf("failed to auto migrate schema: %v", err)
+	}
+	// Insert test data
+	masks := []mask.Mask{
+		{Name: "Mask A", Price: 10.0, Stock: 1},
+		{Name: "Mask B", Price: 15.0, Stock: 1},
+		{Name: "Mask C", Price: 20.0, Stock: 1},
+		{Name: "Mask D", Price: 25.0, Stock: 1},
+		{Name: "Mask E", Price: 30.0, Stock: 1},
+		{Name: "Mask F", Price: 35.0, Stock: 1},
+		{Name: "Mak ck", Price: 40.0, Stock: 1},
+	}
+	err = db.Create(&masks).Error
+	if err != nil {
+		t.Fatalf("failed to insert masks: %v", err)
 	}
 
 	return db
@@ -52,8 +45,6 @@ func setupTestMaskDB(t *testing.T) *gorm.DB {
 
 func TestSearchMasksByKeyword(t *testing.T) {
 	db := setupTestMaskDB(t)
-	defer db.Exec("DROP TABLE IF EXISTS masks;")
-
 	service := &MasksQuery{db: db}
 
 	tests := []struct {
@@ -66,15 +57,15 @@ func TestSearchMasksByKeyword(t *testing.T) {
 		},
 		{
 			keyword:  "Mask",
-			expected: 4,
+			expected: 6,
 		},
 		{
 			keyword:  "ck",
-			expected: 2,
+			expected: 1,
 		},
 		{
 			keyword:  "k",
-			expected: 6,
+			expected: 7,
 		},
 	}
 

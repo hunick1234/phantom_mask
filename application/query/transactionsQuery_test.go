@@ -28,11 +28,12 @@ func setupSummaryTestDB(t *testing.T) *gorm.DB {
 	}
 
 	transactions := []transaction.Transaction{
-		{ID: 1, UserID: 1, TransactionDate: parseTime("2025-01-01"), TransactionAmount: 100.0},
-		{ID: 2, UserID: 2, TransactionDate: parseTime("2025-01-02"), TransactionAmount: 60.0},
-		{ID: 3, UserID: 1, TransactionDate: parseTime("2025-01-03"), TransactionAmount: 50.0},
-		{ID: 4, UserID: 3, TransactionDate: parseTime("2025-01-04"), TransactionAmount: 120.0},
-		{ID: 5, UserID: 2, TransactionDate: parseTime("2025-01-05"), TransactionAmount: 230.0},
+		{ID: 1, UserID: 1, TransactionDate: parseTime("2025-01-01"), TransactionAmount: 100.0, Status: "success"},
+		{ID: 6, UserID: 1, TransactionDate: parseTime("2025-01-01"), TransactionAmount: 160.0, Status: "failed"},
+		{ID: 2, UserID: 2, TransactionDate: parseTime("2025-01-02"), TransactionAmount: 60.0, Status: "success"},
+		{ID: 3, UserID: 1, TransactionDate: parseTime("2025-01-03"), TransactionAmount: 50.0, Status: "success"},
+		{ID: 4, UserID: 3, TransactionDate: parseTime("2025-01-04"), TransactionAmount: 120.0, Status: "success"},
+		{ID: 5, UserID: 2, TransactionDate: parseTime("2025-01-05"), TransactionAmount: 230.0, Status: "success"},
 	}
 	db.Create(&transactions)
 
@@ -44,6 +45,7 @@ func setupSummaryTestDB(t *testing.T) *gorm.DB {
 		{TransactionID: 4, MaskID: 2, Quantity: 2, PricePerUnit: 60.0},
 		{TransactionID: 5, MaskID: 3, Quantity: 1, PricePerUnit: 70.0},
 		{TransactionID: 5, MaskID: 1, Quantity: 2, PricePerUnit: 80.0},
+		{TransactionID: 6, MaskID: 1, Quantity: 2, PricePerUnit: 80.0},
 	}
 	db.Create(&items)
 
@@ -76,6 +78,15 @@ func TestGetTransactionSummary(t *testing.T) {
 			expected: TransactionSummaryDTO{
 				TotalMasks:  4,
 				TotalAmount: 110,
+			},
+		},
+		{
+			testName:  "test case 3, no failed transactions",
+			startDate: parseTime("2025-01-01"),
+			endDate:   parseTime("2025-01-01"),
+			expected: TransactionSummaryDTO{
+				TotalMasks:  3,
+				TotalAmount: 100,
 			},
 		},
 	}
